@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		<title>ELEVASI</title>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+		<link rel="stylesheet" type="text/css" href="css.css">
+
+		<style type="text/css">
+			body{
+				margin-top:100px;
+				font-family: Broadway;
+			}
+			.well{
+					text-align: center;
+					font-size: 20px;
+				}
+			.glyphicon { margin-right:10px; }
+			.panel-body { padding:0px; }
+			.panel-body table tr td { padding-left: 15px }
+			.panel-body .table {margin-bottom: 0px; }
+			a:link {text-decoration: none}
+			a:visited {text-decoration: none}
+			a:active {text-decoration: none}
+			h1{font-family: Broadway;}
+			 #pages {
+			   padding:8px 16px;
+			   border:1px solid #ccc;
+			   color:#333;
+			   font-weight:bold;
+			  }
+		</style>
+
+        <style type="text/css">
+              #mapDiv { width: 785px; height: 345px; }
+        </style>
+
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDt_RuCG8oPCT1R6LneSu4b8kNyn9kP0W0&libraries=drawing&sensor=false">
+        </script>
+
+  <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+              
+              //define global elevator object
+			  var elevator;
+			  
+			  //define global marker popup variable
+			  var popup;
+              
+              function initMap() {
+					//initialize the elevation service
+				  	elevator = new google.maps.ElevationService();
+  					
+					//initialize info popup window
+					popup = new google.maps.InfoWindow();
+                    //Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+                    //Setting starting options of map
+                    var mapOptions = {
+                          center: new google.maps.LatLng(-7.5717183, 110.7790199),
+                          zoom: 10,
+                          mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    //Getting map DOM element
+                    var mapElement = document.getElementById("mapDiv");
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+					
+					//creating drawingManager
+					var drawingManager = new google.maps.drawing.DrawingManager({
+						//initial drawing tool to be enabled
+						drawingMode:null,
+						//enable the drawingControl to be seen in the UI
+						drawingControl:true,
+						//select which drawing modes to be seen in the drawingControl and position them
+						drawingControlOptions: {
+							//select a position in the UI
+							position: google.maps.ControlPosition.TOP_CENTER,
+							//selected drawing modes to be seen in the control
+							drawingModes: [
+								google.maps.drawing.OverlayType.MARKER							]
+						}
+					});
+					
+					//enable drawing functionality
+					drawingManager.setMap(map);
+					
+					//add event listener for completion of your marker
+					google.maps.event.addListener(drawingManager, 'markercomplete', function(marker) {
+						
+						//get the LatLng object of the marker, it is necessary for the elevation service
+						var markerPosition = marker.getPosition();
+						//embed the marker position in an array
+						var markerPositions = [markerPosition];
+						
+						//send the elevation request
+						elevator.getElevationForLocations({'locations': markerPositions}, function(results, status) {
+      						//if the service is working properly...
+      						if (status == google.maps.ElevationStatus.OK) {
+        						//Array of results will return if everything is OK
+        						if (results) {
+        							//infowindow stuff
+        							showElevationOfResult(results[0],marker);
+        						}
+      						} 
+      						//if the service is not working, deal with it
+      						else {
+        						alert("Elevation request failed because: " + status);
+      						}
+    					});	
+					});
+					
+					//function for displaying the elevation on the infowindow
+					function showElevationOfResult(result, marker) {
+						map.setCenter(marker.getPosition());
+						map.setZoom(13);
+						var popupContent = '<b>Elevation: </b> ' + result.elevation;
+						popup.setContent(popupContent);
+						popup.open(map, marker);
+					
+					}
+              }  
+        </script>
+
+</head>
+<body onload="initMap()">
+	<div class="row">
+    <div class="container">
+      <div class="col-md-14">
+		<nav class = "navbar navbar-default navbar-fixed-top" role = "navigation">
+	   
+	   <div class = "navbar-header">
+	      <a class = "navbar-brand" href = "#"><h4><label>Sistem Informasi Geografis 2017</label></h4></a>
+	   </div>
+	   
+	   <div>
+			
+	      <p class = "navbar-text navbar-right">
+				<a class = "navbar-brand" href = "https://github.com/L200140024"><label>L200140024 | Fatimah Martiningsih</label></a>
+	       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+	      
+	   </div>
+	   </nav>
+	</div>
+    	<div class="col-md-9">
+    		<div class="panel-body page-contents">
+
+    		<div class="well">
+
+    			<center><h4><b> <img height='100' weight='100' src='1.png'></img> </b></h4></center><br/>
+				
+				<a href="tugas5_alamat.html" class="btn btn-success" role="button">Alamat</a>
+				<a href="tugas5_koordinat.html" class="btn btn-success" role="button">Koordinat</a>
+				<a href="tugas5_elevasi.html" class="btn btn-success" role="button">Ketinggian</a>
+				<a href="tugas5_jarak.html" class="btn btn-success" role="button">Jarak</a>
+				<a href="tugas5_rute.html" class="btn btn-success" role="button">Rute</a>
+				<a href="tugas5_street_view.html" class="btn btn-success" role="button">Street View</a>
+				
+				<div>
+					<br/><div id="mapDiv">
+					</div>
+				</div>
+
+    		</div>
+
+    		</div>
+    	</div>
+
+</body>
+</html>
